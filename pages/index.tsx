@@ -5,7 +5,7 @@ import Header from "../components/Header";
 import Landing from "../components/Landing";
 import Layout from "../components/Layout";
 import Products from "../components/Products";
-import { fetchCategories, fetchProducts } from "../utils/utils";
+import { fetchCategories, fetchProducts, SanityClient } from "../utils/utils";
 
 interface HomeProps {
   categories: Category[];
@@ -37,8 +37,17 @@ const Home = ({ categories, products }: HomeProps) => {
 export default Home;
 
 export const getStaticProps: GetStaticProps = async () => {
-  const categories: Category[] = await fetchCategories();
-  const products: Product[] = await fetchProducts();
+  const categories: Category[] =  await SanityClient.fetch('*[_type == "category"]');
+  const products: Product[] = await SanityClient.fetch(`*[_type == "products"]{
+    _id,
+    ...,
+    category->{
+      title,
+      slug,
+      _id
+    }
+  }
+  `);
   return {
     props: {
       categories,
